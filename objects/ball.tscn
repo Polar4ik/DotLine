@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://bnk4tgbwb43ce"]
+
+[ext_resource type="Script" path="res://scripts/ball_controller.gd" id="1_s38bw"]
+[ext_resource type="Texture2D" uid="uid://d386rb687frtf" path="res://assets/sprites/dot_line.png" id="1_ykbh2"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a6q4k"]
+atlas = ExtResource("1_ykbh2")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_jyc6x"]
+radius = 5.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_i842q"]
+radius = 6.08276
+
+[node name="Ball" type="CharacterBody2D"]
+texture_filter = 1
+collision_layer = 4
+collision_mask = 3
+motion_mode = 1
+script = ExtResource("1_s38bw")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_a6q4k")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_jyc6x")
+
+[node name="BounceArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 3
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BounceArea"]
+shape = SubResource("CircleShape2D_i842q")
+debug_color = Color(0.940711, 0.0797408, 0.57127, 0.42)
+
+[connection signal="body_entered" from="BounceArea" to="." method="_on_bounce_area_body_entered"]

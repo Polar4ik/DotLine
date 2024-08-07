@@ -7,6 +7,8 @@ var center := Vector2(600, 300)
 var energy := 60.0
 
 func _ready() -> void:
+	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
+	
 	$Ability.energy_used.connect(
 		func(new_energy: float):
 			energy = new_energy * 6.0

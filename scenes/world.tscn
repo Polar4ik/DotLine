@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://b660ho7vakt7s"]
+[gd_scene load_steps=14 format=3 uid="uid://b660ho7vakt7s"]
 
 [ext_resource type="Script" path="res://scripts/world.gd" id="1_1xc8t"]
 [ext_resource type="Script" path="res://scripts/platform_acrchon_point_controller.gd" id="3_shnuj"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bnk4tgbwb43ce" path="res://objects/ball.tscn" id="5_yppew"]
 [ext_resource type="Script" path="res://scripts/ability.gd" id="6_0hx7q"]
 [ext_resource type="Script" path="res://scripts/save_manager.gd" id="7_yf42t"]
+[ext_resource type="Texture2D" uid="uid://d386rb687frtf" path="res://assets/sprites/dot_line.png" id="8_mqvig"]
 
 [sub_resource type="GDScript" id="GDScript_73j5s"]
 script/source = "extends Marker2D
@@ -49,6 +50,17 @@ func load_results() -> void:
 	$BestScoreLabel.text = \"Лучший результат: \" + str(snappedf(save.get_best_score(), 0.01))
 "
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_hh8bq"]
+atlas = ExtResource("8_mqvig")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="GDScript" id="GDScript_u8sue"]
+script/source = "extends Sprite2D
+
+func _process(_delta: float) -> void:
+	position = get_global_mouse_position()
+"
+
 [node name="World" type="Node2D"]
 texture_filter = 1
 script = ExtResource("1_1xc8t")
@@ -72,6 +84,7 @@ script = SubResource("GDScript_73j5s")
 [node name="Player" parent="PlayerArcholPoint" instance=ExtResource("5_35fac")]
 unique_name_in_owner = true
 position = Vector2(60, 0)
+collision_mask = 0
 
 [node name="PlatformArcholPoint" type="Marker2D" parent="." node_paths=PackedStringArray("ball")]
 position = Vector2(600, 300)
@@ -177,5 +190,10 @@ size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
 text = "НАЖМИТЕ ЛКМ ДЛЯ РЕСТАРТА"
 horizontal_alignment = 1
+
+[node name="Cursor" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.501961)
+texture = SubResource("AtlasTexture_hh8bq")
+script = SubResource("GDScript_u8sue")
 
 [connection signal="timeout" from="Ability/Timer" to="Ability" method="_on_timer_timeout"]

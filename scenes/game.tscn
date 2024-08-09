@@ -1,0 +1,200 @@
+[gd_scene load_steps=14 format=3 uid="uid://bttdsh2lgx0tf"]
+
+[ext_resource type="Script" path="res://scripts/world.gd" id="1_jui5j"]
+[ext_resource type="Script" path="res://scripts/save_manager.gd" id="2_xj16e"]
+[ext_resource type="Script" path="res://scripts/ability.gd" id="3_1gdyd"]
+[ext_resource type="Texture2D" uid="uid://d386rb687frtf" path="res://assets/sprites/dot_line.png" id="4_fyxx0"]
+[ext_resource type="PackedScene" uid="uid://cvepwtnw2y1rp" path="res://objects/player.tscn" id="5_upmii"]
+[ext_resource type="Script" path="res://scripts/platform_acrchon_point_controller.gd" id="6_x7ecs"]
+[ext_resource type="PackedScene" uid="uid://dh0hcs87q6gyf" path="res://objects/platform.tscn" id="7_3kn5j"]
+[ext_resource type="PackedScene" uid="uid://bnk4tgbwb43ce" path="res://objects/ball.tscn" id="8_iwtr6"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hh8bq"]
+atlas = ExtResource("4_fyxx0")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="GDScript" id="GDScript_u8sue"]
+script/source = "extends Sprite2D
+
+func _process(_delta: float) -> void:
+	position = get_global_mouse_position()
+"
+
+[sub_resource type="GDScript" id="GDScript_73j5s"]
+script/source = "extends Marker2D
+
+@onready var player: CharacterBody2D = $Player
+@onready var player_pos := player.position
+
+func _process(delta: float) -> void:
+	player_pos = player.position
+	
+	var new_ang := position.angle_to_point(get_global_mouse_position())
+	rotation = lerp_angle(rotation, new_ang, 10.0 * delta)
+	
+	#look_at(get_global_mouse_position())
+"
+
+[sub_resource type="GDScript" id="GDScript_dqf3t"]
+script/source = "extends Label
+
+var time_pass := 0.0
+var can_count := true
+
+func _process(delta: float) -> void:
+	if can_count == false:
+		return
+	
+	time_pass += 1.0 * delta
+	text = str(snappedf(time_pass, 0.01))
+"
+
+[sub_resource type="GDScript" id="GDScript_4sioc"]
+script/source = "extends VBoxContainer
+
+func _ready() -> void:
+	G.game_over.connect(load_results)
+
+func load_results() -> void:
+	var save := %SaveManager
+	$GamesCountLabel.text = \"Проведено игр: \" + str(save.get_games_count())
+	$BestScoreLabel.text = \"Лучший результат: \" + str(snappedf(save.get_best_score(), 0.01))
+"
+
+[node name="Game" type="Node"]
+
+[node name="World" type="Node2D" parent="."]
+texture_filter = 1
+script = ExtResource("1_jui5j")
+
+[node name="SaveManager" type="Node" parent="World"]
+unique_name_in_owner = true
+script = ExtResource("2_xj16e")
+
+[node name="Ability" type="Node" parent="World"]
+script = ExtResource("3_1gdyd")
+
+[node name="Timer" type="Timer" parent="World/Ability"]
+wait_time = 3.0
+one_shot = true
+
+[node name="Cursor" type="Sprite2D" parent="World"]
+modulate = Color(1, 1, 1, 0.501961)
+texture = SubResource("AtlasTexture_hh8bq")
+script = SubResource("GDScript_u8sue")
+
+[node name="PlayerArcholPoint" type="Marker2D" parent="World"]
+position = Vector2(600, 300)
+gizmo_extents = 127.1
+script = SubResource("GDScript_73j5s")
+
+[node name="Player" parent="World/PlayerArcholPoint" instance=ExtResource("5_upmii")]
+unique_name_in_owner = true
+position = Vector2(60, 0)
+collision_mask = 0
+
+[node name="PlatformArcholPoint" type="Marker2D" parent="World" node_paths=PackedStringArray("ball")]
+position = Vector2(600, 300)
+script = ExtResource("6_x7ecs")
+ball = NodePath("../Ball")
+
+[node name="Platform" parent="World/PlatformArcholPoint" instance=ExtResource("7_3kn5j")]
+position = Vector2(-274, 0)
+rotation = 1.5708
+
+[node name="PlatformArcholPoint2" type="Marker2D" parent="World" node_paths=PackedStringArray("ball")]
+position = Vector2(600, 300)
+rotation = 3.14159
+script = ExtResource("6_x7ecs")
+ball = NodePath("../Ball2")
+
+[node name="Platform" parent="World/PlatformArcholPoint2" instance=ExtResource("7_3kn5j")]
+position = Vector2(-274, -0.000106621)
+rotation = 1.5708
+
+[node name="Ball" parent="World" instance=ExtResource("8_iwtr6")]
+position = Vector2(600, 300)
+
+[node name="Ball2" parent="World" instance=ExtResource("8_iwtr6")]
+position = Vector2(600, 300)
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Base" type="Control" parent="UI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+
+[node name="CenterContainer" type="CenterContainer" parent="UI/Base"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TimeLabel" type="Label" parent="UI/Base/CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "TIME"
+horizontal_alignment = 1
+script = SubResource("GDScript_dqf3t")
+
+[node name="EndGame" type="Control" parent="UI"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="UI/EndGame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 25
+
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/EndGame/MarginContainer"]
+layout_mode = 2
+script = SubResource("GDScript_4sioc")
+
+[node name="GameOverLabel" type="Label" parent="UI/EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+text = "Игра окончена"
+horizontal_alignment = 1
+
+[node name="GamesCountLabel" type="Label" parent="UI/EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "Проведено игр: xxx"
+horizontal_alignment = 1
+
+[node name="BestScoreLabel" type="Label" parent="UI/EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "Лучший результат: xxx"
+horizontal_alignment = 1
+
+[node name="RestartLabel" type="Label" parent="UI/EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "НАЖМИТЕ ЛКМ ДЛЯ РЕСТАРТА"
+horizontal_alignment = 1
+
+[connection signal="timeout" from="World/Ability/Timer" to="World/Ability" method="_on_timer_timeout"]

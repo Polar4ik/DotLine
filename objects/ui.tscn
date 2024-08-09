@@ -1,0 +1,107 @@
+[gd_scene load_steps=3 format=3 uid="uid://m15q4a75wrgs"]
+
+[sub_resource type="GDScript" id="GDScript_dqf3t"]
+script/source = "extends Label
+
+var time_pass := 0.0
+var can_count := true
+
+func _process(delta: float) -> void:
+	if can_count == false:
+		return
+	
+	time_pass += 1.0 * delta
+	text = str(snappedf(time_pass, 0.01))
+"
+
+[sub_resource type="GDScript" id="GDScript_4sioc"]
+script/source = "extends VBoxContainer
+
+func _ready() -> void:
+	G.game_over.connect(load_results)
+
+func load_results() -> void:
+	var save := %SaveManager
+	$GamesCountLabel.text = \"Проведено игр: \" + str(save.get_games_count())
+	$BestScoreLabel.text = \"Лучший результат: \" + str(snappedf(save.get_best_score(), 0.01))
+"
+
+[node name="UI" type="CanvasLayer"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TimeLabel" type="Label" parent="Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -11.5
+offset_right = 20.0
+offset_bottom = 11.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 18
+text = "TIME"
+horizontal_alignment = 1
+script = SubResource("GDScript_dqf3t")
+
+[node name="EndGame" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="EndGame"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_top = 25
+
+[node name="VBoxContainer" type="VBoxContainer" parent="EndGame/MarginContainer"]
+layout_mode = 2
+script = SubResource("GDScript_4sioc")
+
+[node name="GameOverLabel" type="Label" parent="EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+text = "Игра окончена"
+horizontal_alignment = 1
+
+[node name="GamesCountLabel" type="Label" parent="EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "Проведено игр: xxx"
+horizontal_alignment = 1
+
+[node name="BestScoreLabel" type="Label" parent="EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "Лучший результат: xxx"
+horizontal_alignment = 1
+
+[node name="RestartLabel" type="Label" parent="EndGame/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "НАЖМИТЕ ЛКМ ДЛЯ РЕСТАРТА"
+horizontal_alignment = 1
